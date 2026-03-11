@@ -72,7 +72,7 @@ const HeroSection = () => {
               variant="outline"
               size="lg"
               onClick={handleJoin}
-              className="rounded-xl h-12 px-6 font-semibold"
+              className="rounded-xl h-12 px-6 font-semibold border-dashed hover:border-solid hover:glow-sm hover:translate-y-[-1px] transition-all"
               disabled={!hashtag.trim()}
             >
               Join Room
