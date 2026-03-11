@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import PinDialog from "@/components/PinDialog";
+import RoomSettingsDialog from "@/components/RoomSettingsDialog";
 
 const Room = () => {
   const { hashtag } = useParams<{ hashtag: string }>();
@@ -59,6 +60,8 @@ const Room = () => {
   const [search, setSearch] = useState("");
   const [sortMode, setSortMode] = useState<"newest" | "oldest" | "name">("newest");
   const [pinVerified, setPinVerified] = useState(false);
+  const [showSetPin, setShowSetPin] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   const filteredFiles = useMemo(() => {
     const q = search.toLowerCase().trim();
@@ -121,6 +124,9 @@ const Room = () => {
             hashtag={normalizedHashtag}
             isExpired={isExpired}
             room={room}
+            onSetPin={() => setShowSetPin(true)}
+            onOpenSettings={() => setShowSettings(true)}
+            onChangeExpiry={() => setShowSettings(true)}
           />
 
           <div className="grid lg:grid-cols-5 gap-6">
@@ -219,6 +225,27 @@ const Room = () => {
         </div>
       </main>
       <Footer />
+
+      {room && (
+        <>
+          <PinDialog
+            mode="set"
+            open={showSetPin}
+            hashtag={normalizedHashtag}
+            roomId={room.id}
+            onVerified={() => setShowSetPin(false)}
+            onClose={() => setShowSetPin(false)}
+          />
+          <RoomSettingsDialog
+            room={room}
+            open={showSettings}
+            onClose={() => setShowSettings(false)}
+            onUpdated={() =>
+              void queryClient.invalidateQueries({ queryKey: ["room-files", normalizedHashtag] })
+            }
+          />
+        </>
+      )}
     </div>
   );
 };

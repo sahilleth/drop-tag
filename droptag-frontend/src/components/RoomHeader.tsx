@@ -21,9 +21,19 @@ interface RoomHeaderProps {
   hashtag: string;
   isExpired?: boolean;
   room?: RoomRecord | null;
+  onSetPin?: () => void;
+  onOpenSettings?: () => void;
+  onChangeExpiry?: () => void;
 }
 
-const RoomHeader = ({ hashtag, isExpired, room }: RoomHeaderProps) => {
+const RoomHeader = ({
+  hashtag,
+  isExpired,
+  room,
+  onSetPin,
+  onOpenSettings,
+  onChangeExpiry,
+}: RoomHeaderProps) => {
   const [copied, setCopied] = useState(false);
   const [presenceCount, setPresenceCount] = useState<number | null>(null);
   const [qrOpen, setQrOpen] = useState(false);
@@ -148,10 +158,16 @@ const RoomHeader = ({ hashtag, isExpired, room }: RoomHeaderProps) => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="rounded-lg w-44">
-            <DropdownMenuItem className="text-xs">Room settings</DropdownMenuItem>
-            <DropdownMenuItem className="text-xs">Change expiry</DropdownMenuItem>
+            <DropdownMenuItem className="text-xs" onClick={onOpenSettings}>
+              Room settings
+            </DropdownMenuItem>
+            <DropdownMenuItem className="text-xs" onClick={onChangeExpiry}>
+              Change expiry
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-xs">Set PIN</DropdownMenuItem>
+            <DropdownMenuItem className="text-xs" onClick={onSetPin}>
+              Set PIN
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="text-xs text-destructive">Delete room</DropdownMenuItem>
           </DropdownMenuContent>

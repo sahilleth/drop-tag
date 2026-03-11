@@ -13,6 +13,14 @@ const HeroSection = () => {
     navigate(`/room/${tag}`);
   };
 
+  const handleJoin = () => {
+    const tag = hashtag.trim();
+    if (!tag) {
+      return;
+    }
+    navigate(`/room/${tag}`);
+  };
+
   return (
     <section className="relative pt-28 pb-24 md:pt-40 md:pb-36 overflow-hidden">
       {/* Grid background */}
@@ -51,14 +59,25 @@ const HeroSection = () => {
           <div className="flex-1">
             <HashtagInput value={hashtag} onChange={setHashtag} />
           </div>
-          <Button
-            size="lg"
-            onClick={handleCreate}
-            className="rounded-xl h-12 px-6 font-semibold glow-sm hover:glow-md transition-all hover:scale-[1.02] active:scale-[0.98]"
-          >
-            Create / Join Room
-            <ArrowRight className="w-4 h-4 ml-2" />
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button
+              size="lg"
+              onClick={handleCreate}
+              className="rounded-xl h-12 px-6 font-semibold glow-sm hover:glow-md transition-all hover:scale-[1.02] active:scale-[0.98]"
+            >
+              Create Room
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={handleJoin}
+              className="rounded-xl h-12 px-6 font-semibold"
+              disabled={!hashtag.trim()}
+            >
+              Join Room
+            </Button>
+          </div>
         </div>
 
         {/* Trust line */}
