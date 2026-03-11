@@ -41,7 +41,7 @@ const HeroSection = () => {
           className="text-base md:text-lg text-muted-foreground max-w-lg mx-auto mb-12 leading-relaxed animate-slide-up"
           style={{ animationDelay: "0.1s" }}
         >
-          Create a temporary cloud space and share files with anyone using a simple hashtag. No accounts needed.
+          Create or join a temporary cloud space and share files with anyone using a simple hashtag. No accounts needed.
         </p>
 
         <div
@@ -56,7 +56,7 @@ const HeroSection = () => {
             onClick={handleCreate}
             className="rounded-xl h-12 px-6 font-semibold glow-sm hover:glow-md transition-all hover:scale-[1.02] active:scale-[0.98]"
           >
-            Create Room
+            Create / Join Room
             <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
         </div>
