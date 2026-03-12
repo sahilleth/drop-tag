@@ -35,9 +35,7 @@ const UploadDropzone = ({ hashtag, disabled, onUploadComplete }: UploadDropzoneP
         setProgress(0);
 
         for (const file of Array.from(files)) {
-          await uploadFile(hashtag, file, (percent) => {
-            setProgress(percent);
-          });
+          await uploadFile(hashtag, file);
         }
 
         setProgress(100);
@@ -52,7 +50,6 @@ const UploadDropzone = ({ hashtag, disabled, onUploadComplete }: UploadDropzoneP
         }, 2000);
       } catch (error: unknown) {
         console.error(error);
-        clearProgress();
         setState("error");
         toast({
           title: "Upload failed",
