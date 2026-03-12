@@ -3,7 +3,7 @@ import HeroSection from "@/components/HeroSection";
 import RecentRooms from "@/components/RecentRooms";
 import FeatureCards from "@/components/FeatureCards";
 import Footer from "@/components/Footer";
-import { Hash, Upload, ArrowRight, Link as LinkIcon } from "lucide-react";
+import { Hash, Upload, Link as LinkIcon } from "lucide-react";
 
 const HowItWorks = () => {
   const steps = [
@@ -51,30 +51,6 @@ const HowItWorks = () => {
   );
 };
 
-const CTA = () => (
-  <section className="py-24 md:py-32">
-    <div className="container max-w-3xl mx-auto px-4 text-center">
-      <div className="relative rounded-2xl border border-border bg-card p-10 md:p-16 overflow-hidden">
-        {/* Glow */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[300px] h-[200px] bg-primary/10 rounded-full blur-[80px] -z-10" />
-        
-        <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-4">
-          Ready to share files?
-        </h2>
-        <p className="text-sm text-muted-foreground mb-8 max-w-sm mx-auto">
-          Create a room in seconds. No account needed.
-        </p>
-        <a href="/r/demo">
-          <button className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm glow-md hover:glow-lg transition-all hover:scale-[1.02] active:scale-[0.98]">
-            Get Started
-            <ArrowRight className="w-4 h-4" />
-          </button>
-        </a>
-      </div>
-    </div>
-  </section>
-);
-
 const Index = () => {
   return (
     <div className="min-h-screen bg-background">
@@ -85,7 +61,6 @@ const Index = () => {
       </div>
       <FeatureCards />
       <HowItWorks />
-      <CTA />
       <Footer />
     </div>
   );
