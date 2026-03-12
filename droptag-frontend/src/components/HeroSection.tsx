@@ -3,14 +3,37 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import HashtagInput from "./HashtagInput";
+import { getRoomByHashtag } from "@/lib/rooms";
+import { useToast } from "@/hooks/use-toast";
 
 const HeroSection = () => {
   const [hashtag, setHashtag] = useState("");
+  const [creating, setCreating] = useState(false);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
-  const handleCreate = () => {
-    const tag = hashtag.trim() || "hackathon2026";
-    navigate(`/room/${tag}`);
+  const handleCreate = async () => {
+    const tag = (hashtag.trim() || "hackathon2026").replace(/^#/, "");
+    if (!tag) return;
+    setCreating(true);
+    try {
+      const existing = await getRoomByHashtag(tag);
+      if (existing) {
+        toast({
+          title: "Room already exists",
+          description: `#${tag} is already in use. Opening it instead.`,
+        });
+      }
+      navigate(`/room/${tag}`);
+    } catch (err) {
+      toast({
+        title: "Something went wrong",
+        description: err instanceof Error ? err.message : "Could not check room.",
+        variant: "destructive",
+      });
+    } finally {
+      setCreating(false);
+    }
   };
 
   const handleJoin = () => {
@@ -62,10 +85,11 @@ const HeroSection = () => {
           <div className="flex flex-col sm:flex-row gap-2">
             <Button
               size="lg"
-              onClick={handleCreate}
+              onClick={() => void handleCreate()}
+              disabled={creating}
               className="rounded-xl h-12 px-6 font-semibold glow-sm hover:glow-md transition-all hover:scale-[1.02] active:scale-[0.98]"
             >
-              Create Room
+              {creating ? "Checking…" : "Create Room"}
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
             <Button
