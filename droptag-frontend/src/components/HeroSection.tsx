@@ -111,7 +111,7 @@ const HeroSection = () => {
           style={{ animationDelay: "0.1s" }}
         >
           Create or join a temporary cloud space and share files with anyone using a simple hashtag.
-          Set a PIN, control room duration, and keep everything private—no accounts needed.
+          Set a PIN, control room duration, and keep everything private - no accounts needed.
         </p>
 
         <div
