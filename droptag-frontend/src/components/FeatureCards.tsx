@@ -43,7 +43,7 @@ const FeatureCards = () => {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-5">
+        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
           {features.map((f, i) => (
             <Card
               key={f.title}
@@ -53,14 +53,18 @@ const FeatureCards = () => {
               {/* Subtle top accent line */}
               <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               
-              <CardContent className="p-6">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-5 group-hover:bg-primary/20 group-hover:glow-sm transition-all">
-                  <f.icon className="w-5 h-5 text-primary" />
+              <CardContent className="p-5">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 group-hover:glow-sm transition-all">
+                    <f.icon className="w-5 h-5 text-primary" />
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="font-semibold text-[15px]">{f.title}</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {f.description}
+                    </p>
+                  </div>
                 </div>
-                <h3 className="font-semibold text-[15px] mb-2">{f.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {f.description}
-                </p>
               </CardContent>
             </Card>
           ))}
