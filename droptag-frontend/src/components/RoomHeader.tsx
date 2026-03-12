@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useEffect, useMemo, useState } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
 import type { RoomRecord } from "@/lib/rooms";
@@ -35,14 +35,18 @@ const RoomHeader = ({
   onOpenSettings,
   onChangeExpiry,
 }: RoomHeaderProps) => {
+  const location = useLocation();
   const [copied, setCopied] = useState(false);
   const [presenceCount, setPresenceCount] = useState<number | null>(null);
   const [qrOpen, setQrOpen] = useState(false);
   const { toast } = useToast();
 
+  const currentSegment = location.pathname.includes("/text") ? "text" : "files";
+  const roomPath = `/room/${room?.hashtag ?? hashtag}/${currentSegment}`;
+
   const copyLink = () => {
     const origin = window.location.origin;
-    const link = `${origin}/room/${room?.hashtag ?? hashtag}`;
+    const link = `${origin}${roomPath}`;
     navigator.clipboard.writeText(link);
     setCopied(true);
     toast({
@@ -190,7 +194,7 @@ const RoomHeader = ({
             <DialogTitle className="text-sm">Share room</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col items-center justify-center gap-3 py-2">
-            <QRCodeSVG value={`${window.location.origin}/room/${room?.hashtag ?? hashtag}`} size={128} />
+            <QRCodeSVG value={`${window.location.origin}${roomPath}`} size={128} />
             <p className="text-[11px] text-center text-muted-foreground">
               Scan this QR code to join this room.
             </p>
