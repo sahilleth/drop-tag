@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Zap, Clock, UserX } from "lucide-react";
+import { Zap, Clock, UserX, Shield, Lock } from "lucide-react";
 
 const features = [
   {
@@ -10,12 +10,22 @@ const features = [
   {
     icon: Clock,
     title: "Temporary Rooms",
-    description: "Rooms auto-expire after a set time. No clutter, no cleanup needed.",
+    description: "Rooms auto-expire after a set time. Set custom durations so everything cleans itself up.",
   },
   {
     icon: UserX,
     title: "No Signups Required",
     description: "Jump straight in. No accounts, no emails, no friction whatsoever.",
+  },
+  {
+    icon: Lock,
+    title: "PIN-Protected Access",
+    description: "Lock rooms with a PIN so only people you share it with can join and see the content.",
+  },
+  {
+    icon: Shield,
+    title: "Ephemeral by Default",
+    description: "Rooms are designed to be temporary. Control how long they live so nothing hangs around longer than it should.",
   },
 ];
 

@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import RoomHeader from "@/components/RoomHeader";
+import RoomFooter from "@/components/RoomFooter";
 import PinDialog from "@/components/PinDialog";
 import RoomSettingsDialog from "@/components/RoomSettingsDialog";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -176,6 +177,7 @@ const RoomLayout = () => {
 
           <div className="mt-6">
             <Outlet context={outletContext} />
+            <RoomFooter />
           </div>
         </div>
       </main>
