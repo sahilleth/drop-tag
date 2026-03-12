@@ -38,7 +38,17 @@ export const createRoom = async (hashtag: string): Promise<RoomRecord> => {
     throw new Error(error.message);
   }
 
-  return data as RoomRecord;
+  const room = data as RoomRecord;
+
+  if (typeof window !== "undefined") {
+    try {
+      window.localStorage.setItem(`droptag:room-owner:${cleanHashtag}`, "1");
+    } catch {
+      // ignore storage errors
+    }
+  }
+
+  return room;
 };
 
 export const getRoomByHashtag = async (hashtag: string): Promise<RoomRecord | null> => {

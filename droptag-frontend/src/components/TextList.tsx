@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { deleteText } from "@/lib/texts";
 import TagInput from "@/components/TagInput";
 import CommentThread from "@/components/CommentThread";
+import { useQueryClient } from "@tanstack/react-query";
 
 export interface TextItem {
   id: string;
@@ -16,6 +17,7 @@ export interface TextItem {
 interface TextListProps {
   texts: TextItem[];
   roomId?: string;
+  hashtag?: string;
 }
 
 const formatCreatedTime = (createdAt: string) => {
@@ -24,10 +26,11 @@ const formatCreatedTime = (createdAt: string) => {
   return date.toLocaleString();
 };
 
-const TextList = ({ texts, roomId }: TextListProps) => {
+const TextList = ({ texts, roomId, hashtag }: TextListProps) => {
   if (!texts.length) return null;
 
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const handleCopy = async (content: string) => {
     try {
@@ -49,6 +52,9 @@ const TextList = ({ texts, roomId }: TextListProps) => {
       toast({
         title: "Text deleted",
       });
+      if (hashtag) {
+        void queryClient.invalidateQueries({ queryKey: ["room-texts", hashtag] });
+      }
     } catch (error: unknown) {
       toast({
         title: "Failed to delete text",

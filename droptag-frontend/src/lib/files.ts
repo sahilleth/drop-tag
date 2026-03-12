@@ -19,53 +19,6 @@ export interface RoomFilesResult {
   isExpired: boolean;
 }
 
-const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
-const MAX_UPLOADS_PER_WINDOW = 10;
-
-const getUploadHistoryKey = (hashtag: string) => `droptag:uploads:${hashtag}`;
-
-const readUploadHistory = (hashtag: string): number[] => {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = window.localStorage.getItem(getUploadHistoryKey(hashtag));
-    if (!raw) return [];
-    const parsed = JSON.parse(raw) as number[];
-    if (!Array.isArray(parsed)) return [];
-    return parsed.filter((ts) => typeof ts === "number");
-  } catch {
-    return [];
-  }
-};
-
-const writeUploadHistory = (hashtag: string, timestamps: number[]) => {
-  if (typeof window === "undefined") return;
-  try {
-    window.localStorage.setItem(getUploadHistoryKey(hashtag), JSON.stringify(timestamps));
-  } catch {
-    // ignore storage errors
-  }
-};
-
-const registerUploads = (hashtag: string, count: number) => {
-  const now = Date.now();
-  const history = readUploadHistory(hashtag).filter((ts) => now - ts <= RATE_LIMIT_WINDOW_MS);
-  for (let i = 0; i < count; i += 1) {
-    history.push(now);
-  }
-  writeUploadHistory(hashtag, history);
-};
-
-const assertWithinRateLimit = (hashtag: string, additionalUploads: number) => {
-  const now = Date.now();
-  const history = readUploadHistory(hashtag).filter((ts) => now - ts <= RATE_LIMIT_WINDOW_MS);
-  const projected = history.length + additionalUploads;
-  if (projected > MAX_UPLOADS_PER_WINDOW) {
-    const remaining = RATE_LIMIT_WINDOW_MS - (now - (history[0] ?? now));
-    const seconds = Math.max(5, Math.round(remaining / 1000));
-    throw new Error(`Too many uploads. Please wait about ${seconds}s and try again.`);
-  }
-};
-
 const MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024; // 50MB
 
 const ALLOWED_MIME_TYPES = [
@@ -109,7 +62,6 @@ export const uploadFile = async (
   }
 
   const cleanHashtag = sanitizeHashtag(hashtag);
-  assertWithinRateLimit(cleanHashtag, 1);
   const roomId = await getOrCreateRoom(cleanHashtag);
 
   const uniqueFileName = generateUniqueFileName(file);
@@ -151,7 +103,6 @@ export const uploadFile = async (
     throw new Error(error.message);
   }
 
-  registerUploads(cleanHashtag, 1);
   return data as FileRecord;
 };
 

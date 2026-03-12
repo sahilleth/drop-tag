@@ -101,6 +101,16 @@ const Room = () => {
 
   const room = filesQuery.data?.room ?? null;
 
+  const canManageRoom = useMemo(() => {
+    if (typeof window === "undefined") return false;
+    try {
+      const flag = window.localStorage.getItem(`droptag:room-owner:${normalizedHashtag}`);
+      return flag === "1";
+    } catch {
+      return false;
+    }
+  }, [normalizedHashtag]);
+
   if (room?.secret_hash && !pinVerified) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -124,9 +134,9 @@ const Room = () => {
             hashtag={normalizedHashtag}
             isExpired={isExpired}
             room={room}
-            onSetPin={() => setShowSetPin(true)}
-            onOpenSettings={() => setShowSettings(true)}
-            onChangeExpiry={() => setShowSettings(true)}
+            onSetPin={canManageRoom ? () => setShowSetPin(true) : undefined}
+            onOpenSettings={canManageRoom ? () => setShowSettings(true) : undefined}
+            onChangeExpiry={canManageRoom ? () => setShowSettings(true) : undefined}
           />
 
           <div className="grid lg:grid-cols-5 gap-6">
@@ -208,7 +218,7 @@ const Room = () => {
               ) : hasFiles ? (
                 <>
                   <FileTable files={filteredFiles} />
-                  <TextList texts={filteredTexts} />
+                  <TextList texts={filteredTexts} roomId={room?.id} hashtag={normalizedHashtag} />
                 </>
               ) : filesQuery.isLoading ? (
                 <div className="rounded-xl border border-border bg-card p-6 text-xs text-muted-foreground">
@@ -217,7 +227,7 @@ const Room = () => {
               ) : (
                 <>
                   <EmptyRoomState />
-                  <TextList texts={texts} />
+                  <TextList texts={texts} roomId={room?.id} hashtag={normalizedHashtag} />
                 </>
               )}
             </div>
@@ -226,7 +236,7 @@ const Room = () => {
       </main>
       <Footer />
 
-      {room && (
+      {room && canManageRoom && (
         <>
           <PinDialog
             mode="set"
