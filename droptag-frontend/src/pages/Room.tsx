@@ -11,6 +11,7 @@ import Footer from "@/components/Footer";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getFilesForRoom, mapFilesToUiItems } from "@/lib/files";
 import { getTextsForRoom } from "@/lib/texts";
+import { getClientId } from "@/lib/clientId";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import { Input } from "@/components/ui/input";
@@ -38,12 +39,16 @@ const Room = () => {
     queryKey: ["room-files", normalizedHashtag],
     queryFn: () => getFilesForRoom(normalizedHashtag),
     enabled: Boolean(normalizedHashtag),
+    refetchOnWindowFocus: true,
+    staleTime: 15 * 1000,
   });
 
   const textsQuery = useQuery({
     queryKey: ["room-texts", normalizedHashtag],
     queryFn: () => getTextsForRoom(normalizedHashtag),
     enabled: Boolean(normalizedHashtag),
+    refetchOnWindowFocus: true,
+    staleTime: 15 * 1000,
   });
 
   const files = useMemo(() => mapFilesToUiItems(filesQuery.data?.files || []), [filesQuery.data]);
@@ -52,7 +57,9 @@ const Room = () => {
       id: t.id,
       content: t.content,
       createdAt: t.created_at,
+      createdBy: t.created_by ?? undefined,
     })) || [];
+  const clientId = getClientId();
   const isExpired = filesQuery.data?.isExpired ?? false;
   const hasFiles = files.length > 0;
   const hasTexts = texts.length > 0;
@@ -228,7 +235,17 @@ const Room = () => {
                     Loading files…
                   </div>
                 ) : hasFiles ? (
-                  <FileTable files={filteredFiles} roomId={room?.id} />
+                  <FileTable
+                    files={filteredFiles}
+                    roomId={room?.id}
+                    canManageRoom={canManageRoom}
+                    clientId={clientId}
+                    onFileDeleted={() =>
+                      void queryClient.invalidateQueries({
+                        queryKey: ["room-files", normalizedHashtag],
+                      })
+                    }
+                  />
                 ) : (
                   <EmptyRoomState />
                 )}
@@ -247,6 +264,8 @@ const Room = () => {
                     texts={filteredTexts}
                     roomId={room?.id}
                     hashtag={normalizedHashtag}
+                    canManageRoom={canManageRoom}
+                    clientId={clientId}
                   />
                 ) : (
                   <div className="rounded-xl border border-dashed border-border bg-card/50 py-8 px-4 text-center">

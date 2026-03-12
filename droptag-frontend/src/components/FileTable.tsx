@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Download, FileText, Image, FileArchive, File, Eye, Link2 } from "lucide-react";
+import { Download, FileText, Image, FileArchive, File, Eye, Link2, Trash2, Loader2 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import CommentThread from "@/components/CommentThread";
 import TagInput from "@/components/TagInput";
+import { deleteFile } from "@/lib/files";
 
 export interface FileItem {
   id: string;
@@ -16,6 +17,7 @@ export interface FileItem {
   type: "image" | "document" | "archive" | "other";
   isImage?: boolean;
   isPdf?: boolean;
+  uploadedBy?: string;
 }
 
 const iconMap = {
@@ -28,6 +30,9 @@ const iconMap = {
 interface FileTableProps {
   files: FileItem[];
   roomId?: string;
+  canManageRoom?: boolean;
+  clientId?: string;
+  onFileDeleted?: () => void;
 }
 
 const formatUploadedTime = (uploadedAt: string) => {
@@ -36,9 +41,32 @@ const formatUploadedTime = (uploadedAt: string) => {
   return date.toLocaleString();
 };
 
-const FileTable = ({ files, roomId }: FileTableProps) => {
+const FileTable = ({ files, roomId, canManageRoom, clientId, onFileDeleted }: FileTableProps) => {
   const [previewFile, setPreviewFile] = useState<FileItem | null>(null);
+  const [previewLoadFailed, setPreviewLoadFailed] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const { toast } = useToast();
+
+  const canDelete = (file: FileItem) =>
+    Boolean(clientId && (canManageRoom || file.uploadedBy === clientId));
+
+  const handleDeleteFile = async (file: FileItem) => {
+    if (!clientId || !canDelete(file)) return;
+    setDeletingId(file.id);
+    try {
+      await deleteFile(file.id, clientId);
+      toast({ title: "File deleted" });
+      onFileDeleted?.();
+    } catch (error: unknown) {
+      toast({
+        title: "Failed to delete file",
+        description: error instanceof Error ? error.message : "Not allowed or error.",
+        variant: "destructive",
+      });
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   const handleCopyLink = async (url: string) => {
     try {
@@ -76,6 +104,8 @@ const FileTable = ({ files, roomId }: FileTableProps) => {
               {files.map((file) => {
                 const Icon = iconMap[file.type];
                 const canPreview = Boolean(file.isImage || file.isPdf);
+                const showDelete = canDelete(file);
+                const isDeleting = deletingId === file.id;
 
                 return (
                   <TableRow
@@ -140,6 +170,26 @@ const FileTable = ({ files, roomId }: FileTableProps) => {
                         </TooltipTrigger>
                         <TooltipContent>Copy link</TooltipContent>
                       </Tooltip>
+                      {showDelete && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6 rounded opacity-0 group-hover:opacity-100 transition-opacity text-destructive"
+                              onClick={() => void handleDeleteFile(file)}
+                              disabled={isDeleting}
+                            >
+                              {isDeleting ? (
+                                <Loader2 className="w-3 h-3 animate-spin" />
+                              ) : (
+                                <Trash2 className="w-3 h-3" />
+                              )}
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Delete file</TooltipContent>
+                        </Tooltip>
+                      )}
                     </TableCell>
                   </TableRow>
                 );
@@ -158,30 +208,62 @@ const FileTable = ({ files, roomId }: FileTableProps) => {
         <Dialog
           open
           onOpenChange={(open) => {
-            if (!open) setPreviewFile(null);
+            if (!open) {
+              setPreviewFile(null);
+              setPreviewLoadFailed(false);
+            }
           }}
         >
           <DialogContent className="max-w-3xl">
             <DialogHeader>
               <DialogTitle className="truncate">{previewFile.name}</DialogTitle>
             </DialogHeader>
-            {previewFile.isImage && (
-              <div className="mt-4">
-                <img
-                  src={previewFile.url}
-                  alt={previewFile.name}
-                  className="w-full h-auto rounded-md border border-border object-contain max-h-[70vh]"
-                />
+            {previewLoadFailed ? (
+              <div className="mt-4 py-8 px-4 text-center rounded-lg border border-dashed border-border bg-muted/30">
+                <p className="text-sm font-medium text-muted-foreground">
+                  This file is no longer available.
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  It may have been deleted from storage. Refresh the list to update.
+                </p>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="mt-4"
+                  onClick={() => {
+                    onFileDeleted?.();
+                    setPreviewFile(null);
+                    setPreviewLoadFailed(false);
+                  }}
+                >
+                  Refresh file list
+                </Button>
               </div>
-            )}
-            {previewFile.isPdf && (
-              <div className="mt-4 h-[70vh]">
-                <iframe
-                  src={previewFile.url}
-                  title={previewFile.name}
-                  className="w-full h-full rounded-md border border-border"
-                />
-              </div>
+            ) : (
+              <>
+                {previewFile.isImage && (
+                  <div className="mt-4">
+                    <img
+                      src={previewFile.url}
+                      alt={previewFile.name}
+                      className="w-full h-auto rounded-md border border-border object-contain max-h-[70vh]"
+                      onError={() => setPreviewLoadFailed(true)}
+                    />
+                  </div>
+                )}
+                {previewFile.isPdf && (
+                  <div className="mt-4 h-[70vh]">
+                    <iframe
+                      src={previewFile.url}
+                      title={previewFile.name}
+                      className="w-full h-full rounded-md border border-border"
+                    />
+                    <p className="text-[11px] text-muted-foreground mt-1">
+                      If the PDF doesn’t load, it may have been removed. Close and click “Refresh” in the room to update the list.
+                    </p>
+                  </div>
+                )}
+              </>
             )}
           </DialogContent>
         </Dialog>

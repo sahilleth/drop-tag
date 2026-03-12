@@ -13,12 +13,15 @@ export interface TextItem {
   id: string;
   content: string;
   createdAt: string;
+  createdBy?: string | null;
 }
 
 interface TextListProps {
   texts: TextItem[];
   roomId?: string;
   hashtag?: string;
+  canManageRoom?: boolean;
+  clientId?: string;
 }
 
 const PREVIEW_CHARS = 400;
@@ -37,11 +40,14 @@ const looksLikeCode = (content: string) => {
   return /^\s*[{}()[\]<>;:=]|def |function |const |let |var |import |from |class |\/\//m.test(content);
 };
 
-const TextList = ({ texts, roomId, hashtag }: TextListProps) => {
+const TextList = ({ texts, roomId, hashtag, canManageRoom, clientId }: TextListProps) => {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  const canDelete = (text: TextItem) =>
+    Boolean(hashtag && clientId && (canManageRoom || text.createdBy === clientId));
 
   if (!texts.length) return null;
 
@@ -60,7 +66,7 @@ const TextList = ({ texts, roomId, hashtag }: TextListProps) => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!hashtag) {
+    if (!hashtag || !clientId) {
       toast({
         title: "Cannot delete",
         description: "Room context missing.",
@@ -70,7 +76,7 @@ const TextList = ({ texts, roomId, hashtag }: TextListProps) => {
     }
     setDeletingId(id);
     try {
-      await deleteText(id);
+      await deleteText(id, clientId);
       await queryClient.refetchQueries({ queryKey: ["room-texts", hashtag] });
       toast({
         title: "Text deleted",
@@ -121,19 +127,21 @@ const TextList = ({ texts, roomId, hashtag }: TextListProps) => {
                       >
                         <Copy className="w-3 h-3" />
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6 rounded text-destructive"
-                        onClick={() => void handleDelete(text.id)}
-                        disabled={deletingId !== null}
-                      >
-                        {deletingId === text.id ? (
-                          <Loader2 className="w-3 h-3 animate-spin" />
-                        ) : (
-                          <Trash2 className="w-3 h-3" />
-                        )}
-                      </Button>
+                      {canDelete(text) && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 rounded text-destructive"
+                          onClick={() => void handleDelete(text.id)}
+                          disabled={deletingId !== null}
+                        >
+                          {deletingId === text.id ? (
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                          ) : (
+                            <Trash2 className="w-3 h-3" />
+                          )}
+                        </Button>
+                      )}
                       {isLong && (
                         <Button
                           variant="ghost"

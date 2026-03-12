@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { getClientId } from "@/lib/clientId";
 import { getOrCreateRoom, getRoomByHashtag, isRoomExpired, sanitizeHashtag, type RoomRecord } from "@/lib/rooms";
 
 export interface FileRecord {
@@ -11,6 +12,7 @@ export interface FileRecord {
   uploaded_at: string;
   mime_type?: string | null;
   size_bytes?: number | null;
+  uploaded_by?: string | null;
 }
 
 export interface RoomFilesResult {
@@ -85,12 +87,14 @@ export const uploadFile = async (
   const { data: publicUrlData } = supabase.storage.from("files").getPublicUrl(path);
   const publicUrl = publicUrlData.publicUrl;
 
+  const clientId = getClientId();
   const { data, error } = await supabase
     .from("files")
     .insert({
       room_id: roomId,
       filename: file.name,
       url: publicUrl,
+      uploaded_by: clientId,
     })
     .select("*")
     .single();
@@ -149,6 +153,17 @@ export const mapFilesToUiItems = (records: FileRecord[]) =>
       type,
       isPdf,
       isImage,
+      uploadedBy: record.uploaded_by ?? undefined,
     };
   });
+
+export const deleteFile = async (id: string, clientId: string): Promise<void> => {
+  const { error } = await supabase.rpc("delete_file_if_allowed", {
+    p_file_id: id,
+    p_client_id: clientId,
+  });
+  if (error) {
+    throw new Error(error.message);
+  }
+};
 

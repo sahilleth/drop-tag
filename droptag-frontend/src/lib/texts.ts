@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { getClientId } from "@/lib/clientId";
 import { getOrCreateRoom, getRoomByHashtag, isRoomExpired, sanitizeHashtag, type RoomRecord } from "@/lib/rooms";
 
 export interface TextRecord {
@@ -6,6 +7,7 @@ export interface TextRecord {
   room_id: string;
   content: string;
   created_at: string;
+  created_by?: string | null;
 }
 
 export interface RoomTextsResult {
@@ -23,11 +25,13 @@ export const createText = async (hashtag: string, content: string): Promise<Text
   const cleanHashtag = sanitizeHashtag(hashtag);
   const roomId = await getOrCreateRoom(cleanHashtag);
 
+  const clientId = getClientId();
   const { data, error } = await supabase
     .from("texts")
     .insert({
       room_id: roomId,
       content: trimmed,
+      created_by: clientId,
     })
     .select("*")
     .single();
@@ -70,8 +74,11 @@ export const getTextsForRoom = async (hashtag: string): Promise<RoomTextsResult>
   };
 };
 
-export const deleteText = async (id: string): Promise<void> => {
-  const { error } = await supabase.from("texts").delete().eq("id", id);
+export const deleteText = async (id: string, clientId: string): Promise<void> => {
+  const { error } = await supabase.rpc("delete_text_if_allowed", {
+    p_text_id: id,
+    p_client_id: clientId,
+  });
   if (error) {
     throw new Error(error.message);
   }

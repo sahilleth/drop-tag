@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { getClientId } from "@/lib/clientId";
 
 export interface RoomRecord {
   id: string;
@@ -7,6 +8,7 @@ export interface RoomRecord {
   expiry: string | null;
   secret_hash?: string | null;
   auto_clean_after_days?: number | null;
+  created_by?: string | null;
 }
 
 const ROOM_EXPIRY_HOURS = 24;
@@ -24,12 +26,14 @@ export const isRoomExpired = (room: RoomRecord | null) => {
 export const createRoom = async (hashtag: string): Promise<RoomRecord> => {
   const cleanHashtag = sanitizeHashtag(hashtag);
   const expiresAt = new Date(Date.now() + ROOM_EXPIRY_HOURS * 60 * 60 * 1000).toISOString();
+  const clientId = getClientId();
 
   const { data, error } = await supabase
     .from("rooms")
     .insert({
       hashtag: cleanHashtag,
       expiry: expiresAt,
+      created_by: clientId,
     })
     .select("*")
     .single();
