@@ -129,107 +129,134 @@ const Room = () => {
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
       <main className="flex-1 pt-20 pb-16">
-        <div className="container max-w-5xl mx-auto px-4">
-          <RoomHeader
-            hashtag={normalizedHashtag}
-            isExpired={isExpired}
-            room={room}
-            onSetPin={canManageRoom ? () => setShowSetPin(true) : undefined}
-            onOpenSettings={canManageRoom ? () => setShowSettings(true) : undefined}
-            onChangeExpiry={canManageRoom ? () => setShowSettings(true) : undefined}
-          />
+        <div className="container max-w-6xl mx-auto px-4 sm:px-6">
+          <header className="mb-8">
+            <RoomHeader
+              hashtag={normalizedHashtag}
+              isExpired={isExpired}
+              room={room}
+              onSetPin={canManageRoom ? () => setShowSetPin(true) : undefined}
+              onOpenSettings={canManageRoom ? () => setShowSettings(true) : undefined}
+              onChangeExpiry={canManageRoom ? () => setShowSettings(true) : undefined}
+            />
+          </header>
 
-          <div className="grid lg:grid-cols-5 gap-6">
-            <div className="lg:col-span-2">
-              <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground mb-3">
-                Upload
-              </p>
-              {isExpired ? (
-                <div className="space-y-3">
-                  <Alert variant="destructive" className="rounded-xl border-2 border-dashed">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
+            {/* Left: Upload & share */}
+            <aside className="lg:col-span-4 xl:col-span-4 space-y-6 lg:sticky lg:top-24 lg:self-start">
+              <section className="space-y-3">
+                <h2 className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                  Share
+                </h2>
+                {isExpired ? (
+                  <div className="space-y-3">
+                    <Alert variant="destructive" className="rounded-xl border-2 border-dashed">
+                      <ExclamationTriangleIcon className="w-4 h-4" />
+                      <AlertTitle>This room has expired.</AlertTitle>
+                      <AlertDescription>
+                        Uploads are disabled. You can still download existing files below.
+                      </AlertDescription>
+                    </Alert>
+                    <Button
+                      size="sm"
+                      className="rounded-md h-8 text-xs"
+                      onClick={() => navigate("/")}
+                    >
+                      Create New Room
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <UploadDropzone
+                      hashtag={normalizedHashtag}
+                      disabled={isExpired}
+                      onUploadComplete={handleUploadComplete}
+                    />
+                    <TextShare
+                      hashtag={normalizedHashtag}
+                      disabled={isExpired}
+                      onTextCreated={handleTextCreated}
+                    />
+                  </>
+                )}
+              </section>
+            </aside>
+
+            {/* Right: Files & messages */}
+            <div className="lg:col-span-8 xl:col-span-8 space-y-8">
+              {/* Files section */}
+              <section className="space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <h2 className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                    Files{" "}
+                    <span className="text-muted-foreground/60 font-normal">
+                      {filesQuery.isLoading ? "…" : hasFiles ? filteredFiles.length : 0}
+                    </span>
+                  </h2>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      placeholder="Search files…"
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      className="h-8 flex-1 sm:flex-none sm:w-36 md:w-44 text-xs rounded-lg"
+                    />
+                    <Select
+                      value={sortMode}
+                      onValueChange={(value) => setSortMode(value as typeof sortMode)}
+                    >
+                      <SelectTrigger className="h-8 w-28 text-xs rounded-lg">
+                        <SelectValue placeholder="Sort" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="newest">Newest</SelectItem>
+                        <SelectItem value="oldest">Oldest</SelectItem>
+                        <SelectItem value="name">Name</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                {filesQuery.isError ? (
+                  <Alert variant="destructive" className="rounded-xl">
                     <ExclamationTriangleIcon className="w-4 h-4" />
-                    <AlertTitle>This room has expired.</AlertTitle>
+                    <AlertTitle>Something went wrong</AlertTitle>
                     <AlertDescription>
-                      Uploads are disabled. You can still download existing files below.
+                      {(filesQuery.error as Error)?.message ?? "Failed to load files for this room."}
                     </AlertDescription>
                   </Alert>
-                  <Button
-                    size="sm"
-                    className="rounded-md h-8 text-xs"
-                    onClick={() => navigate("/")}
-                  >
-                    Create New Room
-                  </Button>
-                </div>
-              ) : (
-                <>
-                  <UploadDropzone
-                    hashtag={normalizedHashtag}
-                    disabled={isExpired}
-                    onUploadComplete={handleUploadComplete}
-                  />
-                  <TextShare
-                    hashtag={normalizedHashtag}
-                    disabled={isExpired}
-                    onTextCreated={handleTextCreated}
-                  />
-                </>
-              )}
-            </div>
-
-            <div className="lg:col-span-3">
-              <div className="flex items-center justify-between mb-3 gap-3">
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-                  Files{" "}
-                  <span className="text-muted-foreground/60">
-                    ({filesQuery.isLoading ? "…" : hasFiles ? filteredFiles.length : 0})
-                  </span>
-                </p>
-                <div className="flex items-center gap-2">
-                  <Input
-                    placeholder="Search…"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="h-8 w-32 md:w-40 text-xs"
-                  />
-                  <Select
-                    value={sortMode}
-                    onValueChange={(value) => setSortMode(value as typeof sortMode)}
-                  >
-                    <SelectTrigger className="h-8 w-28 text-xs">
-                      <SelectValue placeholder="Sort" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="newest">Newest</SelectItem>
-                      <SelectItem value="oldest">Oldest</SelectItem>
-                      <SelectItem value="name">Name</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              {filesQuery.isError ? (
-                <Alert variant="destructive" className="rounded-xl">
-                  <ExclamationTriangleIcon className="w-4 h-4" />
-                  <AlertTitle>Something went wrong</AlertTitle>
-                  <AlertDescription>
-                    {(filesQuery.error as Error)?.message ?? "Failed to load files for this room."}
-                  </AlertDescription>
-                </Alert>
-              ) : hasFiles ? (
-                <>
-                  <FileTable files={filteredFiles} />
-                  <TextList texts={filteredTexts} roomId={room?.id} hashtag={normalizedHashtag} />
-                </>
-              ) : filesQuery.isLoading ? (
-                <div className="rounded-xl border border-border bg-card p-6 text-xs text-muted-foreground">
-                  Loading files…
-                </div>
-              ) : (
-                <>
+                ) : filesQuery.isLoading ? (
+                  <div className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
+                    Loading files…
+                  </div>
+                ) : hasFiles ? (
+                  <FileTable files={filteredFiles} roomId={room?.id} />
+                ) : (
                   <EmptyRoomState />
-                  <TextList texts={texts} roomId={room?.id} hashtag={normalizedHashtag} />
-                </>
-              )}
+                )}
+              </section>
+
+              {/* Messages section */}
+              <section className="space-y-3">
+                <h2 className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                  Messages{" "}
+                  <span className="text-muted-foreground/60 font-normal">
+                    {hasTexts ? filteredTexts.length : 0}
+                  </span>
+                </h2>
+                {hasTexts ? (
+                  <TextList
+                    texts={filteredTexts}
+                    roomId={room?.id}
+                    hashtag={normalizedHashtag}
+                  />
+                ) : (
+                  <div className="rounded-xl border border-dashed border-border bg-card/50 py-8 px-4 text-center">
+                    <p className="text-sm text-muted-foreground">No messages yet.</p>
+                    <p className="text-xs text-muted-foreground/80 mt-1">
+                      Use the panel on the left to share text with this room.
+                    </p>
+                  </div>
+                )}
+              </section>
             </div>
           </div>
         </div>
