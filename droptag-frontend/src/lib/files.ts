@@ -47,7 +47,14 @@ const getFileTypeFromRecord = (record: FileRecord): "image" | "document" | "arch
 };
 
 const generateUniqueFileName = (file: File): string => {
-  return `${Date.now()}-${Math.random().toString(36).slice(2)}-${file.name}`;
+  const original = file.name || "file";
+  const lastDot = original.lastIndexOf(".");
+  const base = lastDot > 0 ? original.slice(0, lastDot) : original;
+  const ext = lastDot > 0 ? original.slice(lastDot) : "";
+  const safeBase = base.replace(/[^a-zA-Z0-9-_]+/g, "-").slice(0, 60);
+  const safeExt = ext.replace(/[^a-zA-Z0-9.]/g, "");
+  const unique = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  return `${safeBase || "file"}-${unique}${safeExt}`;
 };
 
 export const uploadFile = async (
