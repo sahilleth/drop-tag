@@ -1,30 +1,52 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import HashtagInput from "./HashtagInput";
 import { getRoomByHashtag } from "@/lib/rooms";
 import { useToast } from "@/hooks/use-toast";
 
+const normalizedTag = (s: string) => s.trim().replace(/^#/, "");
+
 const HeroSection = () => {
   const [hashtag, setHashtag] = useState("");
+  const [debouncedTag, setDebouncedTag] = useState("");
   const [creating, setCreating] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  useEffect(() => {
+    const tag = normalizedTag(hashtag);
+    const t = setTimeout(() => setDebouncedTag(tag), 400);
+    return () => clearTimeout(t);
+  }, [hashtag]);
+
+  const { data: existingRoom, isLoading: checkingRoom } = useQuery({
+    queryKey: ["room-exists", debouncedTag],
+    queryFn: () => getRoomByHashtag(debouncedTag),
+    enabled: debouncedTag.length > 0,
+    staleTime: 30 * 1000,
+  });
+
+  const tag = normalizedTag(hashtag);
+  const joinDisabled =
+    !tag ||
+    (tag === debouncedTag && (checkingRoom || !existingRoom));
+
   const handleCreate = async () => {
-    const tag = (hashtag.trim() || "hackathon2026").replace(/^#/, "");
-    if (!tag) return;
+    const tagToCreate = tag || "hackathon2026";
+    if (!tagToCreate) return;
     setCreating(true);
     try {
-      const existing = await getRoomByHashtag(tag);
+      const existing = await getRoomByHashtag(tagToCreate);
       if (existing) {
         toast({
           title: "Room already exists",
-          description: `#${tag} is already in use. Opening it instead.`,
+          description: `#${tagToCreate} is already in use. Opening it instead.`,
         });
       }
-      navigate(`/room/${tag}`);
+      navigate(`/room/${tagToCreate}`);
     } catch (err) {
       toast({
         title: "Something went wrong",
@@ -37,10 +59,7 @@ const HeroSection = () => {
   };
 
   const handleJoin = () => {
-    const tag = hashtag.trim();
-    if (!tag) {
-      return;
-    }
+    if (!tag || joinDisabled) return;
     navigate(`/room/${tag}`);
   };
 
@@ -96,10 +115,10 @@ const HeroSection = () => {
               variant="outline"
               size="lg"
               onClick={handleJoin}
-              className="rounded-xl h-12 px-6 font-semibold border-dashed hover:border-solid hover:glow-sm hover:translate-y-[-1px] transition-all"
-              disabled={!hashtag.trim()}
+              className="rounded-xl h-12 px-6 font-semibold border-dashed hover:border-solid hover:glow-sm hover:translate-y-[-1px] transition-all disabled:opacity-60"
+              disabled={joinDisabled}
             >
-              Join Room
+              {tag && tag === debouncedTag && checkingRoom ? "Checking…" : "Join Room"}
             </Button>
           </div>
         </div>
