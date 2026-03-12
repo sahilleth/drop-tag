@@ -24,6 +24,7 @@ const CommentThread = ({ roomId, fileId, textId }: CommentThreadProps) => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [value, setValue] = useState("");
+  const [open, setOpen] = useState(false);
 
   const queryKey =
     fileId != null ? ["comments-file", fileId] : textId != null ? ["comments-text", textId] : null;

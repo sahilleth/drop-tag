@@ -56,95 +56,97 @@ const FileTable = ({ files, roomId }: FileTableProps) => {
 
   return (
     <>
-      <div className="rounded-xl border border-border overflow-hidden bg-card">
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-secondary/50 hover:bg-secondary/50 border-b border-border">
-              <TableHead className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                File
-              </TableHead>
-              <TableHead className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground w-28 hidden sm:table-cell">
-                Uploaded
-              </TableHead>
-              <TableHead className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground w-28 text-right">
-                Actions
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {files.map((file) => {
-              const Icon = iconMap[file.type];
-              const canPreview = Boolean(file.isImage || file.isPdf);
+      <div className="rounded-xl border border-border overflow-hidden bg-card flex flex-col max-h-[min(55vh,520px)]">
+        <div className="overflow-auto min-h-0 flex-1">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-secondary/50 hover:bg-secondary/50 border-b border-border sticky top-0 z-10">
+                <TableHead className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground bg-secondary/95 backdrop-blur py-2">
+                  File
+                </TableHead>
+                <TableHead className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground w-24 hidden sm:table-cell bg-secondary/95 backdrop-blur py-2">
+                  Uploaded
+                </TableHead>
+                <TableHead className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground w-24 text-right bg-secondary/95 backdrop-blur py-2">
+                  Actions
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {files.map((file) => {
+                const Icon = iconMap[file.type];
+                const canPreview = Boolean(file.isImage || file.isPdf);
 
-              return (
-                <TableRow
-                  key={file.id}
-                  className="group transition-colors hover:bg-secondary/20 border-b border-border last:border-0"
-                >
-                  <TableCell className="py-2.5">
-                    <div className="flex flex-col gap-1">
-                      <div className="flex items-center gap-3">
-                        <div className="w-7 h-7 rounded-md bg-secondary flex items-center justify-center shrink-0">
-                          <Icon className="w-3.5 h-3.5 text-muted-foreground" />
+                return (
+                  <TableRow
+                    key={file.id}
+                    className="group transition-colors hover:bg-secondary/20 border-b border-border last:border-0"
+                  >
+                    <TableCell className="py-1.5">
+                      <div className="flex flex-col gap-0.5">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 rounded bg-secondary flex items-center justify-center shrink-0">
+                            <Icon className="w-3 h-3 text-muted-foreground" />
+                          </div>
+                          <span className="text-xs font-medium truncate max-w-[180px] sm:max-w-[240px]">
+                            {file.name}
+                          </span>
                         </div>
-                        <span className="text-[13px] font-medium truncate max-w-[200px]">
-                          {file.name}
-                        </span>
+                        <TagInput fileId={file.id} />
                       </div>
-                      <TagInput fileId={file.id} />
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-xs text-muted-foreground hidden sm:table-cell align-top">
-                    {formatUploadedTime(file.uploadedAt)}
-                  </TableCell>
-                  <TableCell className="text-right space-x-1 align-top">
-                    {canPreview && (
+                    </TableCell>
+                    <TableCell className="text-[11px] text-muted-foreground hidden sm:table-cell align-top py-1.5">
+                      {formatUploadedTime(file.uploadedAt)}
+                    </TableCell>
+                    <TableCell className="text-right space-x-0.5 align-top py-1.5">
+                      {canPreview && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                              onClick={() => setPreviewFile(file)}
+                            >
+                              <Eye className="w-3 h-3" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Preview</TooltipContent>
+                        </Tooltip>
+                      )}
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-7 w-7 rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
-                            onClick={() => setPreviewFile(file)}
+                            className="h-6 w-6 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={() => window.open(file.url, "_blank", "noopener,noreferrer")}
                           >
-                            <Eye className="w-3.5 h-3.5" />
+                            <Download className="w-3 h-3" />
                           </Button>
                         </TooltipTrigger>
-                        <TooltipContent>Preview</TooltipContent>
+                        <TooltipContent>Download</TooltipContent>
                       </Tooltip>
-                    )}
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7 rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
-                          onClick={() => window.open(file.url, "_blank", "noopener,noreferrer")}
-                        >
-                          <Download className="w-3.5 h-3.5" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Download</TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7 rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
-                          onClick={() => handleCopyLink(file.url)}
-                        >
-                          <Link2 className="w-3.5 h-3.5" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Copy link</TooltipContent>
-                    </Tooltip>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={() => handleCopyLink(file.url)}
+                          >
+                            <Link2 className="w-3 h-3" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Copy link</TooltipContent>
+                      </Tooltip>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </div>
       </div>
 
       {roomId &&
