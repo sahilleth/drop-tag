@@ -1,6 +1,6 @@
-# DropTag Frontend
+# droptag frontend
 
-This is the DropTag frontend, built with:
+This is the droptag frontend, built with:
 
 - Vite
 - TypeScript

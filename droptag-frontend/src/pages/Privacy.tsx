@@ -9,7 +9,7 @@ const Privacy = () => {
         <div className="container max-w-3xl mx-auto px-4 space-y-6">
           <h1 className="text-2xl font-semibold tracking-tight">Privacy Policy</h1>
           <p className="text-sm text-muted-foreground">
-            DropTag.cloud is a simple file and text sharing tool built on Supabase. This page
+            droptag.cloud is a simple file and text sharing tool built on Supabase. This page
             explains what data is stored and how it is used.
           </p>
 
@@ -52,7 +52,7 @@ const Privacy = () => {
           <section className="space-y-2">
             <h2 className="text-sm font-semibold">Contact</h2>
             <p className="text-sm text-muted-foreground">
-              If you have questions about privacy on DropTag.cloud, please reach out to the project
+              If you have questions about privacy on droptag.cloud, please reach out to the project
               maintainer.
             </p>
           </section>

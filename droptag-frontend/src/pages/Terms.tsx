@@ -9,7 +9,7 @@ const Terms = () => {
         <div className="container max-w-3xl mx-auto px-4 space-y-6">
           <h1 className="text-2xl font-semibold tracking-tight">Terms of Use</h1>
           <p className="text-sm text-muted-foreground">
-            By using DropTag.cloud you agree to the terms on this page. This is a lightweight,
+            By using droptag.cloud you agree to the terms on this page. This is a lightweight,
             best‑effort service for sharing files and text via hashtag rooms.
           </p>
 
@@ -27,7 +27,7 @@ const Terms = () => {
             <p className="text-sm text-muted-foreground">
               This service is provided &quot;as is&quot; without warranties of any kind. Files and
               rooms may be cleaned up automatically after expiry or due to maintenance. Do not rely
-              on DropTag.cloud as your only copy of important data.
+              on droptag.cloud as your only copy of important data.
             </p>
           </section>
 

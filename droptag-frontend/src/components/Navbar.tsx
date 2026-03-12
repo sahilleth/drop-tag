@@ -45,7 +45,7 @@ const Navbar = () => {
             <Hash className="w-3.5 h-3.5 text-primary-foreground" />
           </div>
           <span className="text-sm font-semibold tracking-tight">
-            DropTag<span className="text-muted-foreground font-normal">.cloud</span>
+            droptag<span className="text-muted-foreground font-normal">.cloud</span>
           </span>
         </Link>
 

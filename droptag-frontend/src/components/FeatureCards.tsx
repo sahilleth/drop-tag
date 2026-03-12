@@ -41,7 +41,7 @@ const FeatureCards = () => {
         <div className="text-center mb-16">
           <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">Features</p>
           <h2 className="text-2xl md:text-4xl font-bold tracking-tight mb-4">
-            Why teams choose DropTag
+            Why teams choose droptag
           </h2>
           <p className="text-muted-foreground max-w-md mx-auto text-sm">
             The fastest way to share files with a group. Zero friction.
