@@ -1,7 +1,8 @@
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { Copy, Trash2 } from "lucide-react";
+import { Copy, Trash2, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { deleteText } from "@/lib/texts";
 import TagInput from "@/components/TagInput";
@@ -27,10 +28,11 @@ const formatCreatedTime = (createdAt: string) => {
 };
 
 const TextList = ({ texts, roomId, hashtag }: TextListProps) => {
-  if (!texts.length) return null;
-
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  if (!texts.length) return null;
 
   const handleCopy = async (content: string) => {
     try {
@@ -47,20 +49,29 @@ const TextList = ({ texts, roomId, hashtag }: TextListProps) => {
   };
 
   const handleDelete = async (id: string) => {
+    if (!hashtag) {
+      toast({
+        title: "Cannot delete",
+        description: "Room context missing.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setDeletingId(id);
     try {
       await deleteText(id);
+      await queryClient.refetchQueries({ queryKey: ["room-texts", hashtag] });
       toast({
         title: "Text deleted",
       });
-      if (hashtag) {
-        void queryClient.invalidateQueries({ queryKey: ["room-texts", hashtag] });
-      }
     } catch (error: unknown) {
       toast({
         title: "Failed to delete text",
         description: error instanceof Error ? error.message : "Something went wrong.",
         variant: "destructive",
       });
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -97,9 +108,14 @@ const TextList = ({ texts, roomId, hashtag }: TextListProps) => {
                       variant="ghost"
                       size="icon"
                       className="h-6 w-6 rounded-md text-destructive"
-                      onClick={() => handleDelete(text.id)}
+                      onClick={() => void handleDelete(text.id)}
+                      disabled={deletingId !== null}
                     >
-                      <Trash2 className="w-3 h-3" />
+                      {deletingId === text.id ? (
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                      ) : (
+                        <Trash2 className="w-3 h-3" />
+                      )}
                     </Button>
                   </div>
                 </div>
