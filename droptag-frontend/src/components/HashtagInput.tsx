@@ -22,7 +22,7 @@ const HashtagInput = ({ value, onChange, placeholder = "hackathon2026" }: Hashta
       </div>
       <Input
         value={value}
-        onChange={(e) => onChange(e.target.value.replace(/[^a-zA-Z0-9_-]/g, ""))}
+        onChange={(e) => onChange(e.target.value.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 30))}
         placeholder={placeholder}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}

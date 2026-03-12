@@ -1,6 +1,8 @@
 import { supabase } from "@/lib/supabase";
 import { getClientId } from "@/lib/clientId";
 
+const ROOM_NAME_REGEX = /^[a-zA-Z0-9-_]{3,30}$/;
+
 export interface RoomRecord {
   id: string;
   hashtag: string;
@@ -16,6 +18,10 @@ const ROOM_EXPIRY_HOURS = 24;
 export const sanitizeHashtag = (raw: string) => {
   const withoutHash = raw.trim().replace(/^#/, "");
   return withoutHash;
+};
+
+export const isValidRoomName = (name: string) => {
+  return ROOM_NAME_REGEX.test(name);
 };
 
 /** Parse expiry string as UTC so we don't get timezone shifts (e.g. DB returning without "Z"). */

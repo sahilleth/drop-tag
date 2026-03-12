@@ -1,8 +1,8 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef } from "react";
 import Navbar from "@/components/Navbar";
 import RoomHeader from "@/components/RoomHeader";
-import UploadDropzone from "@/components/UploadDropzone";
+import UploadDropzone, { type UploadDropzoneHandle } from "@/components/UploadDropzone";
 import FileTable from "@/components/FileTable";
 import TextShare from "@/components/TextShare";
 import TextList, { type TextItem } from "@/components/TextList";
@@ -12,6 +12,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getFilesForRoom, mapFilesToUiItems } from "@/lib/files";
 import { getTextsForRoom } from "@/lib/texts";
 import { getClientId } from "@/lib/clientId";
+import { isValidRoomName } from "@/lib/rooms";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import { Input } from "@/components/ui/input";
@@ -35,10 +36,12 @@ const Room = () => {
     [hashtag],
   );
 
+  const isRoomNameValid = isValidRoomName(normalizedHashtag);
+
   const filesQuery = useQuery({
     queryKey: ["room-files", normalizedHashtag],
     queryFn: () => getFilesForRoom(normalizedHashtag),
-    enabled: Boolean(normalizedHashtag),
+    enabled: Boolean(normalizedHashtag) && isRoomNameValid,
     refetchOnWindowFocus: true,
     staleTime: 15 * 1000,
   });
@@ -46,7 +49,7 @@ const Room = () => {
   const textsQuery = useQuery({
     queryKey: ["room-texts", normalizedHashtag],
     queryFn: () => getTextsForRoom(normalizedHashtag),
-    enabled: Boolean(normalizedHashtag),
+    enabled: Boolean(normalizedHashtag) && isRoomNameValid,
     refetchOnWindowFocus: true,
     staleTime: 15 * 1000,
   });
@@ -69,6 +72,7 @@ const Room = () => {
   const [pinVerified, setPinVerified] = useState(false);
   const [showSetPin, setShowSetPin] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const uploadRef = useRef<UploadDropzoneHandle | null>(null);
 
   const filteredFiles = useMemo(() => {
     const q = search.toLowerCase().trim();
@@ -117,6 +121,31 @@ const Room = () => {
       return false;
     }
   }, [normalizedHashtag]);
+
+  if (!isRoomNameValid) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <Navbar />
+        <main className="flex-1 pt-20 pb-16">
+          <div className="container max-w-3xl mx-auto px-4 sm:px-6">
+            <Alert variant="destructive" className="rounded-xl">
+              <ExclamationTriangleIcon className="w-4 h-4" />
+              <AlertTitle>Invalid room name</AlertTitle>
+              <AlertDescription>
+                Room name must be 3–30 characters and can contain letters, numbers, - or _.
+              </AlertDescription>
+            </Alert>
+            <div className="mt-4">
+              <Button size="sm" className="rounded-md h-8 text-xs" onClick={() => navigate("/")}>
+                Go back home
+              </Button>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   if (room?.secret_hash && !pinVerified) {
     return (
@@ -175,6 +204,7 @@ const Room = () => {
                 ) : (
                   <>
                     <UploadDropzone
+                      ref={uploadRef}
                       hashtag={normalizedHashtag}
                       disabled={isExpired}
                       onUploadComplete={handleUploadComplete}
@@ -247,7 +277,7 @@ const Room = () => {
                     }
                   />
                 ) : (
-                  <EmptyRoomState />
+                  <EmptyRoomState onUpload={() => uploadRef.current?.openFileDialog()} />
                 )}
               </section>
 

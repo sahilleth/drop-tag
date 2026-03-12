@@ -15,10 +15,10 @@ const EmptyRoomState = ({ onUpload }: EmptyRoomStateProps) => {
         </div>
         <h3 className="text-sm font-medium mb-1">This room is empty.</h3>
         <p className="text-xs text-muted-foreground mb-4 max-w-xs">
-          Upload files to share them instantly.
+          Upload files to start sharing.
         </p>
         <Button size="sm" className="rounded-lg" onClick={onUpload}>
-          Upload files
+          Upload Files
         </Button>
       </CardContent>
     </Card>

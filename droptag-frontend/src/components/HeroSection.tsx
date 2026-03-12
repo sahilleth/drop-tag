@@ -4,7 +4,7 @@ import { ArrowRight, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import HashtagInput from "./HashtagInput";
-import { getRoomByHashtag } from "@/lib/rooms";
+import { getRoomByHashtag, isValidRoomName } from "@/lib/rooms";
 import { useToast } from "@/hooks/use-toast";
 
 const normalizedTag = (s: string) => s.trim().replace(/^#/, "");
@@ -25,18 +25,28 @@ const HeroSection = () => {
   const { data: existingRoom, isLoading: checkingRoom } = useQuery({
     queryKey: ["room-exists", debouncedTag],
     queryFn: () => getRoomByHashtag(debouncedTag),
-    enabled: debouncedTag.length > 0,
+    enabled: debouncedTag.length > 0 && isValidRoomName(debouncedTag),
     staleTime: 30 * 1000,
   });
 
   const tag = normalizedTag(hashtag);
+  const tagIsValid = !tag || isValidRoomName(tag);
   const joinDisabled =
     !tag ||
+    !tagIsValid ||
     (tag === debouncedTag && (checkingRoom || !existingRoom));
 
   const handleCreate = async () => {
     const tagToCreate = tag || "hackathon2026";
     if (!tagToCreate) return;
+    if (!isValidRoomName(tagToCreate)) {
+      toast({
+        title: "Invalid room name",
+        description: "Room name must be 3–30 characters and can contain letters, numbers, - or _.",
+        variant: "destructive",
+      });
+      return;
+    }
     setCreating(true);
     try {
       const existing = await getRoomByHashtag(tagToCreate);
@@ -59,7 +69,16 @@ const HeroSection = () => {
   };
 
   const handleJoin = () => {
-    if (!tag || joinDisabled) return;
+    if (!tag) return;
+    if (!isValidRoomName(tag)) {
+      toast({
+        title: "Invalid room name",
+        description: "Room name must be 3–30 characters and can contain letters, numbers, - or _.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (joinDisabled) return;
     navigate(`/room/${tag}`);
   };
 
@@ -100,6 +119,11 @@ const HeroSection = () => {
         >
           <div className="flex-1">
             <HashtagInput value={hashtag} onChange={setHashtag} />
+            {tag && !tagIsValid && (
+              <p className="mt-1 text-xs text-destructive text-left">
+                Room name must be 3–30 characters and can contain letters, numbers, - or _.
+              </p>
+            )}
           </div>
           <div className="flex flex-col sm:flex-row gap-2">
             <Button
