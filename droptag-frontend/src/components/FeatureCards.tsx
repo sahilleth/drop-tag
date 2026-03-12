@@ -1,11 +1,11 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Zap, Clock, UserX, Shield, Lock } from "lucide-react";
+import { Zap, Clock, UserX, Shield, Lock, Columns3 } from "lucide-react";
 
 const features = [
   {
     icon: Zap,
     title: "Instant Uploads",
-    description: "Drag, drop, and share. Files are available to everyone in the room immediately.",
+    description: "Upload files in a couple of clicks and share a single room link with everyone.",
   },
   {
     icon: Clock,
@@ -25,7 +25,12 @@ const features = [
   {
     icon: Shield,
     title: "Ephemeral by Default",
-    description: "Rooms are designed to be temporary. Control how long they live so nothing hangs around longer than it should.",
+    description: "Rooms are designed to be temporary. Control how long they live so nothing hangs around longer than they should.",
+  },
+  {
+    icon: Columns3,
+    title: "Files & Text, Organized",
+    description: "Separate tabs for files and text keep each room tidy, whether you're sharing assets or notes.",
   },
 ];
 
