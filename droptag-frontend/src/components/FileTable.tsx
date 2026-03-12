@@ -176,7 +176,7 @@ const FileTable = ({ files, roomId, canManageRoom, clientId, onFileDeleted }: Fi
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-6 w-6 rounded opacity-0 group-hover:opacity-100 transition-opacity text-destructive"
+                              className="h-6 w-6 rounded text-destructive hover:text-destructive hover:bg-destructive/10"
                               onClick={() => void handleDeleteFile(file)}
                               disabled={isDeleting}
                             >
@@ -187,7 +187,7 @@ const FileTable = ({ files, roomId, canManageRoom, clientId, onFileDeleted }: Fi
                               )}
                             </Button>
                           </TooltipTrigger>
-                          <TooltipContent>Delete file</TooltipContent>
+                          <TooltipContent>Delete file (only you or room creator)</TooltipContent>
                         </Tooltip>
                       )}
                     </TableCell>

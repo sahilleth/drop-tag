@@ -163,6 +163,15 @@ export const deleteFile = async (id: string, clientId: string): Promise<void> =>
     p_client_id: clientId,
   });
   if (error) {
+    const rpcMissing =
+      error.code === "42883" ||
+      error.message?.includes("does not exist") ||
+      error.message?.includes("could not find");
+    if (rpcMissing) {
+      const { error: delError } = await supabase.from("files").delete().eq("id", id);
+      if (delError) throw new Error(delError.message);
+      return;
+    }
     throw new Error(error.message);
   }
 };
