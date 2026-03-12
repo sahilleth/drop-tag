@@ -14,6 +14,7 @@ import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
 import type { RoomRecord } from "@/lib/rooms";
+import { parseExpiryUtc } from "@/lib/rooms";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { QRCodeSVG } from "qrcode.react";
 
@@ -50,12 +51,15 @@ const RoomHeader = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const [now, setNow] = useState(() => Date.now());
+
   const expiryLabel = useMemo(() => {
     if (isExpired) return "This room has expired.";
     if (!room?.expiry) return "Expires in 24h";
 
-    const expiryDate = new Date(room.expiry);
-    const diffMs = expiryDate.getTime() - Date.now();
+    const expiryMs = parseExpiryUtc(room.expiry);
+    if (expiryMs == null) return "Expires in 24h";
+    const diffMs = expiryMs - now;
     if (diffMs <= 0) return "This room has expired.";
 
     const diffMinutes = Math.round(diffMs / (1000 * 60));
@@ -67,7 +71,13 @@ const RoomHeader = ({
     }
 
     return `Expires in ${hours}h${minutes > 0 ? ` ${minutes}m` : ""}`;
-  }, [isExpired, room?.expiry]);
+  }, [isExpired, room?.expiry, now]);
+
+  useEffect(() => {
+    if (!room?.expiry || isExpired) return;
+    const interval = setInterval(() => setNow(Date.now()), 60 * 1000);
+    return () => clearInterval(interval);
+  }, [room?.expiry, isExpired]);
 
   useEffect(() => {
     const key = typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : Math.random().toString(36).slice(2);

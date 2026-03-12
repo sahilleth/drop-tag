@@ -18,9 +18,18 @@ export const sanitizeHashtag = (raw: string) => {
   return withoutHash;
 };
 
+/** Parse expiry string as UTC so we don't get timezone shifts (e.g. DB returning without "Z"). */
+export const parseExpiryUtc = (expiry: string | null | undefined): number | null => {
+  if (!expiry?.trim()) return null;
+  const s = expiry.trim();
+  const hasTz = s.endsWith("Z") || /[+-]\d{2}:?\d{2}$/.test(s);
+  return new Date(hasTz ? s : s + "Z").getTime();
+};
+
 export const isRoomExpired = (room: RoomRecord | null) => {
   if (!room || !room.expiry) return false;
-  return new Date(room.expiry).getTime() <= Date.now();
+  const expiryMs = parseExpiryUtc(room.expiry);
+  return expiryMs != null && expiryMs <= Date.now();
 };
 
 export const createRoom = async (hashtag: string): Promise<RoomRecord> => {
