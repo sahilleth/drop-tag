@@ -110,7 +110,8 @@ const HeroSection = () => {
           className="text-base md:text-lg text-muted-foreground max-w-lg mx-auto mb-12 leading-relaxed animate-slide-up"
           style={{ animationDelay: "0.1s" }}
         >
-          Create or join a temporary cloud space and share files with anyone using a simple hashtag. No accounts needed.
+          Create or join a temporary cloud space and share files with anyone using a simple hashtag.
+          Set a PIN, control room duration, and keep everything private—no accounts needed.
         </p>
 
         <div
@@ -152,7 +153,7 @@ const HeroSection = () => {
           className="text-xs text-muted-foreground mt-8 animate-slide-up"
           style={{ animationDelay: "0.3s" }}
         >
-          No signups · Files auto-expire · End-to-end encrypted
+          No signups · PIN-protected rooms · Custom expiry · Files auto-delete
         </p>
       </div>
     </section>
