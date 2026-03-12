@@ -1,5 +1,6 @@
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
+import RecentRooms from "@/components/RecentRooms";
 import FeatureCards from "@/components/FeatureCards";
 import Footer from "@/components/Footer";
 import { Hash, Upload, ArrowRight, Link as LinkIcon } from "lucide-react";
@@ -79,6 +80,9 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       <HeroSection />
+      <div className="container max-w-3xl mx-auto px-4">
+        <RecentRooms />
+      </div>
       <FeatureCards />
       <HowItWorks />
       <CTA />

@@ -1,5 +1,5 @@
 import { Outlet, useParams, useNavigate, NavLink } from "react-router-dom";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -14,6 +14,7 @@ import { getFilesForRoom } from "@/lib/files";
 import { getTextsForRoom } from "@/lib/texts";
 import { getClientId } from "@/lib/clientId";
 import { isValidRoomName, type RoomRecord } from "@/lib/rooms";
+import { addRecentRoom } from "@/lib/recentRooms";
 
 export interface RoomOutletContext {
   normalizedHashtag: string;
@@ -109,6 +110,12 @@ const RoomLayout = () => {
       return false;
     }
   }, [normalizedHashtag]);
+
+  useEffect(() => {
+    if (isRoomNameValid) {
+      addRecentRoom(normalizedHashtag);
+    }
+  }, [isRoomNameValid, normalizedHashtag]);
 
   if (!isRoomNameValid) {
     return (
