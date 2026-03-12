@@ -93,8 +93,6 @@ export const uploadFile = async (
       original_filename: file.name,
       filepath: path,
       url: publicUrl,
-      mime_type: file.type || null,
-      size_bytes: typeof file.size === "number" ? file.size : null,
     })
     .select("*")
     .single();
