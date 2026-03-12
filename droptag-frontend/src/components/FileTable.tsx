@@ -112,8 +112,8 @@ const FileTable = ({ files, roomId, canManageRoom, clientId, onFileDeleted }: Fi
                     key={file.id}
                     className="group transition-colors hover:bg-secondary/20 border-b border-border last:border-0"
                   >
-                    <TableCell className="py-1.5">
-                      <div className="flex flex-col gap-0.5">
+                    <TableCell className="py-1.5 align-top">
+                      <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-2">
                           <div className="w-6 h-6 rounded bg-secondary flex items-center justify-center shrink-0">
                             <Icon className="w-3 h-3 text-muted-foreground" />
@@ -123,6 +123,11 @@ const FileTable = ({ files, roomId, canManageRoom, clientId, onFileDeleted }: Fi
                           </span>
                         </div>
                         <TagInput fileId={file.id} />
+                        {roomId && (
+                          <div className="mt-1">
+                            <CommentThread roomId={roomId} fileId={file.id} />
+                          </div>
+                        )}
                       </div>
                     </TableCell>
                     <TableCell className="text-[11px] text-muted-foreground hidden sm:table-cell align-top py-1.5">
@@ -198,11 +203,6 @@ const FileTable = ({ files, roomId, canManageRoom, clientId, onFileDeleted }: Fi
           </Table>
         </div>
       </div>
-
-      {roomId &&
-        files.map((file) => (
-          <CommentThread key={`comments-${file.id}`} roomId={roomId} fileId={file.id} />
-        ))}
 
       {previewFile && (
         <Dialog

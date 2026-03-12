@@ -7,9 +7,21 @@ import { Hash, Upload, Link as LinkIcon } from "lucide-react";
 
 const HowItWorks = () => {
   const steps = [
-    { icon: Hash, title: "Pick a hashtag", desc: "Choose any hashtag as your room name — like a channel." },
-    { icon: Upload, title: "Upload files", desc: "Drag & drop or click to upload. Instant availability." },
-    { icon: LinkIcon, title: "Share the link", desc: "Anyone with the hashtag can access files instantly." },
+    {
+      icon: Hash,
+      title: "Pick a hashtag",
+      desc: "Choose any hashtag as your room name — like a channel.",
+    },
+    {
+      icon: Upload,
+      title: "Upload files or text",
+      desc: "Click the upload button or type text to share into the room.",
+    },
+    {
+      icon: LinkIcon,
+      title: "Share the room link",
+      desc: "Send the room URL to your team so they can view and download.",
+    },
   ];
 
   return (
