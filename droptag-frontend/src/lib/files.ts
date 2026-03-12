@@ -90,8 +90,6 @@ export const uploadFile = async (
     .insert({
       room_id: roomId,
       filename: file.name,
-      original_filename: file.name,
-      filepath: path,
       url: publicUrl,
     })
     .select("*")
