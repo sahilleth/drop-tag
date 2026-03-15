@@ -9,14 +9,14 @@ const Privacy = () => {
         <div className="container max-w-3xl mx-auto px-4 space-y-6">
           <h1 className="text-2xl font-semibold tracking-tight">Privacy Policy</h1>
           <p className="text-sm text-muted-foreground">
-            droptag.cloud is a simple file and text sharing tool built on Supabase. This page
-            explains what data is stored and how it is used.
+            droptag.cloud is a simple file and text sharing tool. This page explains what data is
+            stored and how it is used.
           </p>
 
           <section className="space-y-2">
             <h2 className="text-sm font-semibold">What we store</h2>
             <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
-              <li>Files you upload to a room (stored in Supabase Storage).</li>
+              <li>Files you upload to a room.</li>
               <li>Text messages you add to a room.</li>
               <li>Room metadata such as hashtag, expiry time, and optional PIN hash.</li>
               <li>Optional comments and tags that you attach to files or texts.</li>
@@ -36,16 +36,16 @@ const Privacy = () => {
             <h2 className="text-sm font-semibold">Security</h2>
             <p className="text-sm text-muted-foreground">
               Room PINs are stored as bcrypt hashes and are never stored in plain text. Files are
-              served via Supabase public URLs. Do not use this service for highly sensitive or
-              regulated data.
+              stored in cloud storage and delivered for download through the app. Do not use this
+              service for highly sensitive or regulated data.
             </p>
           </section>
 
           <section className="space-y-2">
             <h2 className="text-sm font-semibold">Third‑party services</h2>
             <p className="text-sm text-muted-foreground">
-              Storage, database, and realtime features are provided by Supabase. Your data is
-              processed according to Supabase&apos;s own terms and privacy policy.
+              Storage, database, and realtime features rely on third-party infrastructure. Your
+              data is processed according to those providers&apos; terms and privacy policies.
             </p>
           </section>
 
