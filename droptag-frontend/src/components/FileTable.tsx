@@ -41,10 +41,23 @@ const formatUploadedTime = (uploadedAt: string) => {
   return date.toLocaleString();
 };
 
+const triggerDownload = (blob: Blob, filename: string) => {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.rel = "noopener noreferrer";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
+
 const FileTable = ({ files, roomId, canManageRoom, clientId, onFileDeleted }: FileTableProps) => {
   const [previewFile, setPreviewFile] = useState<FileItem | null>(null);
   const [previewLoadFailed, setPreviewLoadFailed] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const canDelete = (file: FileItem) =>
@@ -79,6 +92,26 @@ const FileTable = ({ files, roomId, canManageRoom, clientId, onFileDeleted }: Fi
         title: "Failed to copy link",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleDownload = async (file: FileItem) => {
+    setDownloadingId(file.id);
+    try {
+      const res = await fetch(file.url, { mode: "cors" });
+      if (!res.ok) throw new Error("Download failed");
+      const blob = await res.blob();
+      triggerDownload(blob, file.name);
+      toast({ title: "Download started" });
+    } catch {
+      toast({
+        title: "Could not download in-app",
+        description: "Opening file in a new tab instead.",
+        variant: "destructive",
+      });
+      window.open(file.url, "_blank", "noopener,noreferrer");
+    } finally {
+      setDownloadingId(null);
     }
   };
 
@@ -155,9 +188,14 @@ const FileTable = ({ files, roomId, canManageRoom, clientId, onFileDeleted }: Fi
                             variant="ghost"
                             size="icon"
                             className="h-6 w-6 rounded opacity-0 group-hover:opacity-100 transition-opacity"
-                            onClick={() => window.open(file.url, "_blank", "noopener,noreferrer")}
+                            onClick={() => void handleDownload(file)}
+                            disabled={downloadingId === file.id}
                           >
-                            <Download className="w-3 h-3" />
+                            {downloadingId === file.id ? (
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                            ) : (
+                              <Download className="w-3 h-3" />
+                            )}
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>Download</TooltipContent>
