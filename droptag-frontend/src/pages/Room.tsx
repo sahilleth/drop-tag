@@ -277,7 +277,7 @@ const Room = () => {
                     }
                   />
                 ) : (
-                  <EmptyRoomState onUpload={() => uploadRef.current?.openFileDialog()} />
+                  <EmptyRoomState />
                 )}
               </section>
 

@@ -148,9 +148,9 @@ const RoomFilesPage = () => {
               })
             }
           />
-        ) : (
-          <EmptyRoomState onUpload={() => uploadRef.current?.openFileDialog()} />
-        )}
+                ) : (
+                  <EmptyRoomState />
+                )}
       </section>
     </div>
   );

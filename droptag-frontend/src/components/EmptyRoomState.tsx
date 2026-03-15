@@ -1,12 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { FolderOpen } from "lucide-react";
 
-interface EmptyRoomStateProps {
-  onUpload?: () => void;
-}
-
-const EmptyRoomState = ({ onUpload }: EmptyRoomStateProps) => {
+const EmptyRoomState = () => {
   return (
     <Card className="rounded-xl border border-dashed border-border">
       <CardContent className="flex flex-col items-center justify-center py-16 px-6 text-center">
@@ -15,11 +10,8 @@ const EmptyRoomState = ({ onUpload }: EmptyRoomStateProps) => {
         </div>
         <h3 className="text-sm font-medium mb-1">This room is empty.</h3>
         <p className="text-xs text-muted-foreground mb-4 max-w-xs">
-          Upload files to start sharing.
+          Upload files above to start sharing.
         </p>
-        <Button size="sm" className="rounded-lg" onClick={onUpload}>
-          Upload Files
-        </Button>
       </CardContent>
     </Card>
   );
