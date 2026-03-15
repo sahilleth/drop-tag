@@ -100,13 +100,12 @@ export const getOrCreateRoom = async (hashtag: string): Promise<string> => {
 
 export const updateRoomSettings = async (
   roomId: string,
-  updates: Pick<RoomRecord, "expiry" | "auto_clean_after_days">,
+  updates: Pick<RoomRecord, "expiry">,
 ): Promise<RoomRecord> => {
   const { data, error } = await supabase
     .from("rooms")
     .update({
       expiry: updates.expiry,
-      auto_clean_after_days: updates.auto_clean_after_days,
     })
     .eq("id", roomId)
     .select("*")

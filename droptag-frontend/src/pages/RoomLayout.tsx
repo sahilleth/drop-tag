@@ -204,9 +204,10 @@ const RoomLayout = () => {
             room={room}
             open={showSettings}
             onClose={() => setShowSettings(false)}
-            onUpdated={() =>
-              void queryClient.invalidateQueries({ queryKey: ["room-files", normalizedHashtag] })
-            }
+            onUpdated={() => {
+              void queryClient.invalidateQueries({ queryKey: ["room-files", normalizedHashtag] });
+              void queryClient.invalidateQueries({ queryKey: ["room-texts", normalizedHashtag] });
+            }}
           />
         </>
       )}

@@ -20,6 +20,7 @@ const UploadDropzone = forwardRef<UploadDropzoneHandle, UploadDropzoneProps>(
   ({ hashtag, disabled, onUploadComplete }, ref) => {
   const [state, setState] = useState<UploadState>("empty");
   const [progress, setProgress] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const { toast } = useToast();
 
@@ -44,10 +45,12 @@ const UploadDropzone = forwardRef<UploadDropzoneHandle, UploadDropzoneProps>(
       if (!files || files.length === 0 || disabled) return;
 
       try {
+        const fileList = Array.from(files);
         setState("uploading");
         setProgress(0);
-        for (const file of Array.from(files)) {
-          await uploadFile(hashtag, file);
+        for (let i = 0; i < fileList.length; i++) {
+          await uploadFile(hashtag, fileList[i]);
+          setProgress(Math.round(((i + 1) / fileList.length) * 100));
         }
 
         setProgress(100);
@@ -76,8 +79,44 @@ const UploadDropzone = forwardRef<UploadDropzoneHandle, UploadDropzoneProps>(
     [disabled, hashtag, onUploadComplete, toast],
   );
 
+  const canDrop = !disabled && state !== "uploading";
+  const onDragOver = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (canDrop) setIsDragging(true);
+    },
+    [canDrop],
+  );
+  const onDragLeave = useCallback((e: React.DragEvent) => {
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) setIsDragging(false);
+  }, []);
+  const onDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsDragging(false);
+      if (!canDrop) return;
+      const files = e.dataTransfer.files;
+      if (files?.length) void handleFiles(files);
+    },
+    [canDrop, handleFiles],
+  );
+
   return (
-    <div className="flex flex-col items-center justify-center text-center gap-3">
+    <div
+      className={`
+        relative flex flex-col items-center justify-center text-center gap-4
+        rounded-2xl border-2 border-dashed min-h-[200px] px-6 py-8
+        transition-all duration-200 ease-out
+        ${disabled ? "opacity-60 cursor-not-allowed" : "cursor-default"}
+        ${state === "empty" && !disabled ? "hover:border-primary/40 hover:bg-muted/20" : ""}
+        ${isDragging ? "border-primary bg-primary/10 scale-[1.02] shadow-lg shadow-primary/10" : "border-border/70 bg-muted/5"}
+      `}
+      onDragOver={onDragOver}
+      onDragLeave={onDragLeave}
+      onDrop={onDrop}
+    >
       <input
         ref={fileInputRef}
         type="file"
@@ -90,23 +129,53 @@ const UploadDropzone = forwardRef<UploadDropzoneHandle, UploadDropzoneProps>(
       />
       {state === "success" ? (
         <>
-          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-            <CheckCircle2 className="w-6 h-6 text-primary" />
+          <div className="w-14 h-14 rounded-full bg-primary/15 flex items-center justify-center ring-4 ring-primary/10">
+            <CheckCircle2 className="w-7 h-7 text-primary" />
           </div>
-          <p className="text-sm font-medium text-primary">Upload complete!</p>
+          <p className="text-sm font-semibold text-primary">Upload complete!</p>
+          <p className="text-xs text-muted-foreground">Files are in the room.</p>
         </>
       ) : state === "error" ? (
         <>
-          <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center">
-            <FileUp className="w-6 h-6 text-destructive" />
+          <div className="w-14 h-14 rounded-full bg-destructive/10 flex items-center justify-center ring-4 ring-destructive/10">
+            <FileUp className="w-7 h-7 text-destructive" />
           </div>
-          <p className="text-sm font-medium text-destructive">Upload failed</p>
-          <p className="text-xs text-muted-foreground mt-1">Please try again.</p>
+          <p className="text-sm font-semibold text-destructive">Upload failed</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Please try again.</p>
+        </>
+      ) : state === "uploading" ? (
+        <>
+          <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center animate-pulse">
+            <CloudUpload className="w-7 h-7 text-primary" />
+          </div>
+          <p className="text-sm font-medium">Uploading…</p>
+          <div className="w-full max-w-[200px] h-1.5 rounded-full bg-muted overflow-hidden">
+            <div
+              className="h-full bg-primary rounded-full transition-all duration-300"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
         </>
       ) : (
         <>
-          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-2">
-            <CloudUpload className="w-5 h-5 text-primary" />
+          <div
+            className={`
+              flex items-center justify-center rounded-2xl border-2 border-dashed
+              transition-all duration-200
+              ${isDragging ? "w-16 h-16 border-primary bg-primary/10" : "w-14 h-14 border-muted-foreground/20 bg-muted/50"}
+            `}
+          >
+            <CloudUpload
+              className={`text-primary transition-transform duration-200 ${isDragging ? "w-8 h-8 scale-110" : "w-7 h-7"}`}
+            />
+          </div>
+          <div className="space-y-0.5">
+            <p className="text-sm font-medium">
+              {isDragging ? "Drop files here" : "Drag files here or click to browse"}
+            </p>
+            <p className="text-[11px] text-muted-foreground">
+              {isDragging ? "Images, PDF, ZIP · Max 50MB" : "Images, PDF, ZIP · Max 50MB per file"}
+            </p>
           </div>
           <Button
             type="button"
@@ -117,9 +186,8 @@ const UploadDropzone = forwardRef<UploadDropzoneHandle, UploadDropzoneProps>(
               fileInputRef.current?.click();
             }}
           >
-            {state === "uploading" ? "Uploading…" : "Upload Files"}
+            Choose files
           </Button>
-          <p className="text-[11px] text-muted-foreground mt-1">Max file size: 50MB</p>
         </>
       )}
     </div>
