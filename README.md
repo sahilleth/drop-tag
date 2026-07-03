@@ -2,7 +2,7 @@
 
 Instant, hashtag-based file and text sharing. Create a temporary room, share a link, and collaborate without signups.
 
-**Live:** [drop-tag.vercel.app](https://droptag.cloud)
+**Live:** https://droptag.cloud/
 
 ## Features
 
