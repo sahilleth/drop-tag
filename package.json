@@ -6,13 +6,5 @@
     "build": "cd droptag-frontend && npm run build",
     "lint": "cd droptag-frontend && npm run lint",
     "test": "cd droptag-frontend && npm run test"
-  },
-  "dependencies": {
-    "@supabase/supabase-js": "^2.99.1",
-    "bcryptjs": "^3.0.3",
-    "qrcode.react": "^4.2.0"
-  },
-  "devDependencies": {
-    "@types/bcryptjs": "^2.4.6"
   }
 }
